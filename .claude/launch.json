@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "penetrometro-web",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8100",
+        "--bind",
+        "127.0.0.1",
+        "--directory",
+        "C:/Users/thyag/OneDrive/Desktop/penetrometreMobile/app/build/web"
+      ],
+      "port": 8100
+    }
+  ]
+}

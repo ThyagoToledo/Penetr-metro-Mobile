@@ -1,0 +1,31 @@
+# Análise (clone do desktop — não versionar no repo mobile)
+_analysis/
+
+# Flutter / Dart
+app/.dart_tool/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/build/
+app/.packages
+app/pubspec.lock
+**/*.g.dart
+**/*.freezed.dart
+
+# Android
+app/android/.gradle/
+app/android/local.properties
+app/android/key.properties
+**/*.keystore
+**/*.jks
+
+# Segredos / credenciais
+**/google-services.json
+**/*.env
+secrets/
+
+# IDE / SO
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
