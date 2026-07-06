@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_spacing.dart';
+import '../../../shared/widgets/measurement_card.dart';
 import '../../measurement/application/measurement_providers.dart';
 import '../../measurement/domain/entities/measurement.dart';
-import '../../../shared/widgets/diagnosis_visuals.dart';
+import '../../sync/application/sync_providers.dart';
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -22,13 +22,7 @@ class DashboardPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Penetrômetro'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.cloud_off_outlined),
-            tooltip: 'Drive desconectado',
-            onPressed: () {},
-          ),
-        ],
+        actions: const [_DriveStatusAction()],
       ),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -55,23 +49,15 @@ class DashboardPage extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.cloud_off_outlined),
-              title: const Text('Google Drive'),
-              subtitle: const Text('Desconectado · sincronização na fase F6'),
-              trailing: TextButton(
-                onPressed: () {},
-                child: const Text('Conectar'),
-              ),
-            ),
-          ),
+          const _DriveStatusCard(),
           const SizedBox(height: AppSpacing.lg),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Medições recentes',
-                  style: Theme.of(context).textTheme.titleMedium,),
+              Text(
+                'Medições recentes',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               if (recent.isNotEmpty)
                 TextButton(
                   onPressed: () => context.go('/measurements'),
@@ -83,10 +69,109 @@ class DashboardPage extends ConsumerWidget {
           if (recent.isEmpty)
             _EmptyHint(onCreate: () => context.push('/measurement/new'))
           else
-            ...recent.map((m) => _RecentTile(measurement: m)),
+            ...recent.map((m) => MeasurementCard(measurement: m)),
         ],
       ),
     );
+  }
+}
+
+/// Ícone do AppBar que reflete o estado real da conexão com o Drive.
+class _DriveStatusAction extends ConsumerWidget {
+  const _DriveStatusAction();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final email = ref.watch(driveConnectionProvider).valueOrNull;
+    final connected = email != null;
+    return IconButton(
+      icon: Icon(
+        connected ? Icons.cloud_done_outlined : Icons.cloud_off_outlined,
+        color: connected ? Theme.of(context).colorScheme.primary : null,
+      ),
+      tooltip: connected ? 'Drive: $email' : 'Drive desconectado',
+      onPressed: () => context.go('/settings'),
+    );
+  }
+}
+
+/// Cartão do Google Drive com estado real (conectar / conectado / erro).
+class _DriveStatusCard extends ConsumerWidget {
+  const _DriveStatusCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final conn = ref.watch(driveConnectionProvider);
+
+    return conn.when(
+      loading: () => const Card(
+        child: ListTile(
+          leading: Icon(Icons.add_to_drive),
+          title: Text('Google Drive'),
+          trailing: SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+      ),
+      error: (_, __) => Card(
+        child: ListTile(
+          leading: const Icon(Icons.cloud_off_outlined),
+          title: const Text('Google Drive'),
+          subtitle: const Text('Indisponível — veja Configurações'),
+          trailing: TextButton(
+            onPressed: () => context.go('/settings'),
+            child: const Text('Abrir'),
+          ),
+        ),
+      ),
+      data: (email) {
+        if (email == null) {
+          return Card(
+            child: ListTile(
+              leading: const Icon(Icons.cloud_off_outlined),
+              title: const Text('Google Drive'),
+              subtitle: const Text('Faça backup na sua própria conta'),
+              trailing: FilledButton.tonal(
+                onPressed: () =>
+                    ref.read(driveConnectionProvider.notifier).connect(),
+                child: const Text('Conectar'),
+              ),
+            ),
+          );
+        }
+        return Card(
+          child: ListTile(
+            leading: Icon(
+              Icons.cloud_done_outlined,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            title: Text(email),
+            subtitle: const Text('Conectado ao Google Drive'),
+            trailing: TextButton(
+              onPressed: () => _backupNow(context, ref),
+              child: const Text('Backup'),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _backupNow(BuildContext context, WidgetRef ref) async {
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(
+      const SnackBar(content: Text('Enviando backup ao Drive...')),
+    );
+    try {
+      await ref.read(driveConnectionProvider.notifier).backupNow();
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Backup enviado com sucesso.')),
+      );
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text('Falha no backup: $e')));
+    }
   }
 }
 
@@ -121,31 +206,6 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-class _RecentTile extends StatelessWidget {
-  const _RecentTile({required this.measurement});
-
-  final Measurement measurement;
-
-  @override
-  Widget build(BuildContext context) {
-    final date = measurement.meteringDate;
-    return Card(
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: diagnosisColor(measurement.coefficient),
-          child: Icon(typeIcon(measurement.type), color: Colors.white),
-        ),
-        title: Text('${measurement.coefficient.toStringAsFixed(2)} kgf/cm²'),
-        subtitle: Text(measurement.floorResistance),
-        trailing: Text(
-          date == null ? '' : DateFormat('dd/MM').format(date),
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-      ),
-    );
-  }
-}
-
 class _EmptyHint extends StatelessWidget {
   const _EmptyHint({required this.onCreate});
 
@@ -158,8 +218,11 @@ class _EmptyHint extends StatelessWidget {
         padding: const EdgeInsets.all(AppSpacing.xl),
         child: Column(
           children: [
-            Icon(Icons.straighten,
-                size: 48, color: Theme.of(context).colorScheme.outline,),
+            Icon(
+              Icons.straighten,
+              size: 48,
+              color: Theme.of(context).colorScheme.outline,
+            ),
             const SizedBox(height: AppSpacing.md),
             const Text(
               'Nenhuma medição ainda.\nToque em + para registrar a primeira.',

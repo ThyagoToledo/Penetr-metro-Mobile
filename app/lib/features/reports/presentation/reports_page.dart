@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../measurement/application/measurement_providers.dart';
 import '../application/export_service.dart';
+import 'import_flow.dart';
 
 class ReportsPage extends ConsumerWidget {
   const ReportsPage({super.key});
@@ -39,6 +40,13 @@ class ReportsPage extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
+          _ExportTile(
+            icon: Icons.file_download_outlined,
+            title: 'Importar (JSON ou backup .zip)',
+            enabled: true,
+            onTap: () => runImportFlow(context, ref),
+          ),
+          const Divider(height: AppSpacing.xl),
           _ExportTile(
             icon: Icons.table_chart,
             title: 'Exportar Excel (.xlsx)',

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_spacing.dart';
+import '../../features/project/presentation/project_edit_dialog.dart';
+import '../../features/reports/presentation/import_flow.dart';
 
 /// Casca principal com barra de navegação inferior e FAB de ações.
-class HomeShell extends StatelessWidget {
+class HomeShell extends ConsumerWidget {
   const HomeShell({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
@@ -17,13 +20,13 @@ class HomeShell extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       body: navigationShell,
       floatingActionButton: navigationShell.currentIndex == 4
           ? null
           : FloatingActionButton(
-              onPressed: () => _openActions(context),
+              onPressed: () => _openActions(context, ref),
               child: const Icon(Icons.add),
             ),
       bottomNavigationBar: NavigationBar(
@@ -60,7 +63,7 @@ class HomeShell extends StatelessWidget {
     );
   }
 
-  void _openActions(BuildContext context) {
+  void _openActions(BuildContext context, WidgetRef ref) {
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -71,11 +74,17 @@ class HomeShell extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.sm,),
+                  AppSpacing.lg,
+                  0,
+                  AppSpacing.lg,
+                  AppSpacing.sm,
+                ),
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: Text('Criar',
-                      style: Theme.of(sheetContext).textTheme.titleMedium,),
+                  child: Text(
+                    'Criar',
+                    style: Theme.of(sheetContext).textTheme.titleMedium,
+                  ),
                 ),
               ),
               ListTile(
@@ -85,6 +94,7 @@ class HomeShell extends StatelessWidget {
                 onTap: () {
                   Navigator.pop(sheetContext);
                   context.go('/projects');
+                  showProjectEditDialog(context, ref);
                 },
               ),
               ListTile(
@@ -99,13 +109,10 @@ class HomeShell extends StatelessWidget {
               ListTile(
                 leading: const Icon(Icons.file_upload_outlined),
                 title: const Text('Importar Arquivo'),
-                subtitle: const Text('CSV / JSON / backup'),
+                subtitle: const Text('Export JSON ou backup .zip do app'),
                 onTap: () {
                   Navigator.pop(sheetContext);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Importação chega na fase F4.'),),
-                  );
+                  runImportFlow(context, ref);
                 },
               ),
               const SizedBox(height: AppSpacing.sm),

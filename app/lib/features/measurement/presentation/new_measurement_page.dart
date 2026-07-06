@@ -393,6 +393,7 @@ class _NewMeasurementPageState extends ConsumerState<NewMeasurementPage> {
 
     if (!mounted) return;
     setState(() => _saving = false);
+    HapticFeedback.mediumImpact();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Medição #${saved.id} salva.')),
     );
@@ -430,11 +431,19 @@ class _ResultCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    hasValue
-                        ? '${coefficient.toStringAsFixed(2)} kgf/cm²'
-                        : '— kgf/cm²',
-                    style: Theme.of(context).textTheme.headlineSmall,
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 250),
+                    transitionBuilder: (child, animation) => FadeTransition(
+                      opacity: animation,
+                      child: ScaleTransition(scale: animation, child: child),
+                    ),
+                    child: Text(
+                      hasValue
+                          ? '${coefficient.toStringAsFixed(2)} kgf/cm²'
+                          : '— kgf/cm²',
+                      key: ValueKey(coefficient.toStringAsFixed(2)),
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
                   ),
                   Text(diagnosis,
                       style: Theme.of(context).textTheme.bodyMedium,),

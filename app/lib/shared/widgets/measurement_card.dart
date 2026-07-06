@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -64,6 +65,7 @@ class MeasurementCard extends ConsumerWidget {
       ),
     );
     if (ok == true && measurement.id != null) {
+      HapticFeedback.mediumImpact();
       await ref.read(measurementsProvider.notifier).remove(measurement.id!);
     }
   }

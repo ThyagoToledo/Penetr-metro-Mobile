@@ -36,6 +36,15 @@ class MeasurementsNotifier extends AsyncNotifier<List<Measurement>> {
     ref.invalidateSelf();
     await future;
   }
+
+  Future<int> importAll(List<Measurement> measurements) async {
+    for (final measurement in measurements) {
+      await _repo.save(measurement);
+    }
+    ref.invalidateSelf();
+    await future;
+    return measurements.length;
+  }
 }
 
 /// Estatísticas simples derivadas da lista (total + coeficiente médio).
