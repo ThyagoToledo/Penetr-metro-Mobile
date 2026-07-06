@@ -14,6 +14,29 @@ import '../../shared/widgets/home_shell.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
+/// Transição padrão das rotas empurradas: fade com leve deslize vertical.
+CustomTransitionPage<void> _fadeSlidePage(GoRouterState state, Widget child) {
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    child: child,
+    transitionDuration: const Duration(milliseconds: 250),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      final curved =
+          CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
+      return FadeTransition(
+        opacity: curved,
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 0.04),
+            end: Offset.zero,
+          ).animate(curved),
+          child: child,
+        ),
+      );
+    },
+  );
+}
+
 /// Configuração de rotas (go_router) com shell de navegação por abas.
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -66,19 +89,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/measurement/new',
         parentNavigatorKey: rootNavigatorKey,
-        builder: (c, s) => NewMeasurementPage(projectId: s.extra as int?),
+        pageBuilder: (c, s) =>
+            _fadeSlidePage(s, NewMeasurementPage(projectId: s.extra as int?)),
       ),
       GoRoute(
         path: '/project/:id',
         parentNavigatorKey: rootNavigatorKey,
-        builder: (c, s) => ProjectDetailPage(
-          projectId: int.parse(s.pathParameters['id']!),
+        pageBuilder: (c, s) => _fadeSlidePage(
+          s,
+          ProjectDetailPage(projectId: int.parse(s.pathParameters['id']!)),
         ),
       ),
       GoRoute(
         path: '/charts',
         parentNavigatorKey: rootNavigatorKey,
-        builder: (c, s) => const ChartsPage(),
+        pageBuilder: (c, s) => _fadeSlidePage(s, const ChartsPage()),
       ),
     ],
   );

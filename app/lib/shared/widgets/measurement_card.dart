@@ -8,6 +8,7 @@ import '../../features/measurement/application/measurement_providers.dart';
 import '../../features/measurement/domain/entities/measurement.dart';
 import '../../features/measurement/domain/entities/penetrometer_type.dart';
 import '../../features/reports/application/export_service.dart';
+import 'diagnosis_scale_bar.dart';
 import 'diagnosis_visuals.dart';
 
 /// Card reutilizável de medição (lista geral e detalhe de projeto).
@@ -111,6 +112,8 @@ class MeasurementCard extends ConsumerWidget {
             _row('Profundidade', '${m.deep.toStringAsFixed(2)} cm'),
             _row('Coeficiente', '${m.coefficient.toStringAsFixed(4)} kgf/cm²'),
             _row('Diagnóstico', m.floorResistance),
+            const SizedBox(height: AppSpacing.md),
+            DiagnosisScaleBar(coefficient: m.coefficient),
             const SizedBox(height: AppSpacing.md),
             Text('Interpretação', style: Theme.of(c).textTheme.titleMedium),
             const SizedBox(height: AppSpacing.xs),

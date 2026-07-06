@@ -23,13 +23,17 @@ class ChartsPage extends ConsumerWidget {
           : ListView(
               padding: const EdgeInsets.all(AppSpacing.lg),
               children: [
-                Text('Resistência × Profundidade',
-                    style: Theme.of(context).textTheme.titleMedium,),
+                Text(
+                  'Resistência × Profundidade',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
                 const SizedBox(height: AppSpacing.sm),
                 _ChartCard(child: _ScatterByDepth(items: items)),
                 const SizedBox(height: AppSpacing.lg),
-                Text('Comparação de coeficientes',
-                    style: Theme.of(context).textTheme.titleMedium,),
+                Text(
+                  'Comparação de coeficientes',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
                 const SizedBox(height: AppSpacing.sm),
                 _ChartCard(child: _CoefficientBars(items: items)),
                 const SizedBox(height: AppSpacing.md),
@@ -38,6 +42,25 @@ class ChartsPage extends ConsumerWidget {
             ),
     );
   }
+}
+
+/// Estilos compartilhados dos eixos/grade, derivados do tema atual.
+({TextStyle label, Color grid, Color border}) _chartStyles(
+  BuildContext context,
+) {
+  final scheme = Theme.of(context).colorScheme;
+  return (
+    label: TextStyle(fontSize: 10, color: scheme.onSurfaceVariant),
+    grid: scheme.outlineVariant.withValues(alpha: 0.4),
+    border: scheme.outlineVariant,
+  );
+}
+
+Widget _axisLabel(double value, TitleMeta meta, TextStyle style) {
+  return SideTitleWidget(
+    axisSide: meta.axisSide,
+    child: Text(meta.formattedValue, style: style),
+  );
 }
 
 class _ChartCard extends StatelessWidget {
@@ -50,7 +73,7 @@ class _ChartCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: SizedBox(
-          height: 260,
+          height: 280,
           child: InteractiveViewer(
             minScale: 1,
             maxScale: 4,
@@ -68,34 +91,53 @@ class _ScatterByDepth extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final styles = _chartStyles(context);
     final spots = items
-        .map((m) => ScatterSpot(
-              m.deep,
-              m.coefficient,
-              dotPainter: FlDotCirclePainter(
-                radius: 6,
-                color: diagnosisColor(m.coefficient),
-              ),
-            ),)
+        .map(
+          (m) => ScatterSpot(
+            m.deep,
+            m.coefficient,
+            dotPainter: FlDotCirclePainter(
+              radius: 6,
+              color: diagnosisColor(m.coefficient),
+            ),
+          ),
+        )
         .toList();
 
     return ScatterChart(
       ScatterChartData(
         scatterSpots: spots,
-        titlesData: const FlTitlesData(
+        titlesData: FlTitlesData(
           leftTitles: AxisTitles(
-            axisNameWidget: Text('kgf/cm²'),
-            sideTitles: SideTitles(showTitles: true, reservedSize: 40),
+            axisNameWidget: Text('kgf/cm²', style: styles.label),
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 40,
+              getTitlesWidget: (v, meta) => _axisLabel(v, meta, styles.label),
+            ),
           ),
           bottomTitles: AxisTitles(
-            axisNameWidget: Text('Profundidade (cm)'),
-            sideTitles: SideTitles(showTitles: true, reservedSize: 28),
+            axisNameWidget: Text('Profundidade (cm)', style: styles.label),
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 28,
+              getTitlesWidget: (v, meta) => _axisLabel(v, meta, styles.label),
+            ),
           ),
-          topTitles: AxisTitles(),
-          rightTitles: AxisTitles(),
+          topTitles: const AxisTitles(),
+          rightTitles: const AxisTitles(),
         ),
-        gridData: const FlGridData(show: true),
-        borderData: FlBorderData(show: true),
+        gridData: FlGridData(
+          getDrawingHorizontalLine: (_) =>
+              FlLine(color: styles.grid, strokeWidth: 1),
+          getDrawingVerticalLine: (_) =>
+              FlLine(color: styles.grid, strokeWidth: 1),
+        ),
+        borderData: FlBorderData(
+          show: true,
+          border: Border.all(color: styles.border),
+        ),
       ),
     );
   }
@@ -107,6 +149,7 @@ class _CoefficientBars extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final styles = _chartStyles(context);
     final groups = <BarChartGroupData>[];
     for (var i = 0; i < items.length; i++) {
       final m = items[i];
@@ -129,8 +172,12 @@ class _CoefficientBars extends StatelessWidget {
       BarChartData(
         barGroups: groups,
         titlesData: FlTitlesData(
-          leftTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: true, reservedSize: 40),
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 40,
+              getTitlesWidget: (v, meta) => _axisLabel(v, meta, styles.label),
+            ),
           ),
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
@@ -140,10 +187,7 @@ class _CoefficientBars extends StatelessWidget {
                 if (i < 0 || i >= items.length) return const SizedBox.shrink();
                 return Padding(
                   padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    '#${items[i].id ?? i + 1}',
-                    style: const TextStyle(fontSize: 9),
-                  ),
+                  child: Text('#${items[i].id ?? i + 1}', style: styles.label),
                 );
               },
             ),
@@ -151,8 +195,15 @@ class _CoefficientBars extends StatelessWidget {
           topTitles: const AxisTitles(),
           rightTitles: const AxisTitles(),
         ),
-        gridData: const FlGridData(show: true),
-        borderData: FlBorderData(show: true),
+        gridData: FlGridData(
+          getDrawingHorizontalLine: (_) =>
+              FlLine(color: styles.grid, strokeWidth: 1),
+          drawVerticalLine: false,
+        ),
+        borderData: FlBorderData(
+          show: true,
+          border: Border.all(color: styles.border),
+        ),
         barTouchData: BarTouchData(enabled: true),
       ),
     );

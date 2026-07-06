@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/location/location_service.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../shared/widgets/diagnosis_scale_bar.dart';
 import '../../../shared/widgets/diagnosis_visuals.dart';
 import '../../project/application/project_providers.dart';
 import '../application/measurement_providers.dart';
@@ -423,36 +424,62 @@ class _ResultCard extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.analytics_outlined, color: color, size: 36),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 250),
-                    transitionBuilder: (child, animation) => FadeTransition(
-                      opacity: animation,
-                      child: ScaleTransition(scale: animation, child: child),
-                    ),
-                    child: Text(
-                      hasValue
-                          ? '${coefficient.toStringAsFixed(2)} kgf/cm²'
-                          : '— kgf/cm²',
-                      key: ValueKey(coefficient.toStringAsFixed(2)),
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
+            Row(
+              children: [
+                Icon(Icons.analytics_outlined, color: color, size: 36),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 250),
+                        transitionBuilder: (child, animation) =>
+                            FadeTransition(
+                          opacity: animation,
+                          child: ScaleTransition(
+                            scale: animation,
+                            child: child,
+                          ),
+                        ),
+                        child: Text(
+                          hasValue
+                              ? '${coefficient.toStringAsFixed(2)} kgf/cm²'
+                              : '— kgf/cm²',
+                          key: ValueKey(coefficient.toStringAsFixed(2)),
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                      ),
+                      Text(diagnosis,
+                          style: Theme.of(context).textTheme.bodyMedium,),
+                    ],
                   ),
-                  Text(diagnosis,
-                      style: Theme.of(context).textTheme.bodyMedium,),
-                ],
-              ),
+                ),
+              ],
             ),
+            _ResultBody(coefficient: coefficient, hasValue: hasValue),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ResultBody extends StatelessWidget {
+  const _ResultBody({required this.coefficient, required this.hasValue});
+
+  final double coefficient;
+  final bool hasValue;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!hasValue) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.md),
+      child: DiagnosisScaleBar(coefficient: coefficient),
     );
   }
 }
