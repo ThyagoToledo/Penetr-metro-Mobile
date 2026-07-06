@@ -88,7 +88,7 @@ Consulta: `ConsultSelection` → escolhe tipo → `MeteringListController` lista
 
 - **Engine:** HSQLDB modo arquivo — `jdbc:hsqldb:file:dados_medicoes/medicoes`, usuário `sa`, sem senha.
 - **DDL:** automático via `hibernate.hbm2ddl.auto=update` (a tabela é criada na 1ª execução).
-- **Estado do snapshot analisado:** `medicoes.script` contém apenas o schema de sistema do HSQLDB — **sem a tabela `MEDICOES` populada e sem dados de usuário**. ➜ **Não há dados legados a migrar** nesta cópia.
+- **Estado do snapshot analisado:** `medicoes.script` contém apenas o schema de sistema do HSQLDB — **sem a tabela `MEDICOES` populada e sem dados de usuário**. Nao ha dados legados a migrar nesta copia.
 
 ### Entidade `Metering` → tabela `MEDICOES`
 
@@ -108,7 +108,7 @@ Consulta: `ConsultSelection` → escolhe tipo → `MeteringListController` lista
 | NOME_COLETOR | nameCollector | String(100) | responsável |
 | TIPO_MEDICAO | meteringType | enum String(20) | `IMPACT` / `PRESSURE` |
 
-> ⚠️ Divergência README × código: o README cita um campo `collectorCPF`; **o código real não possui CPF**. O modelo real é o desta tabela.
+> ATENCAO - Divergencia README × código: o README cita um campo `collectorCPF`; **o código real não possui CPF**. O modelo real é o desta tabela.
 
 ---
 
@@ -126,7 +126,7 @@ R = 5.6 + 6.89 × N
 - A **profundidade não entra na fórmula** (é apenas registrada).
 - Há sobrecarga calibrável: `R = factor + offset × N`.
 
-> ⚠️ Divergência README × código: o README mostra `R = (5.6 + 6.89·N) / P`. **O código NÃO divide pela profundidade.** Vale o código.
+> ATENCAO - Divergencia README × código: o README mostra `R = (5.6 + 6.89·N) / P`. **O código NÃO divide pela profundidade.** Vale o código.
 
 ### 6.2 Penetrômetro de Pressão — Conversão
 ```
@@ -144,7 +144,7 @@ coef = leituraMPa × 10.1972      (1 MPa = 10.1972 kgf/cm²)
 | `≤ 40` | Solo compactado |
 | `> 40` | Solo extremamente compactado |
 
-> ⚠️ Divergência README × código: a tabela do README (Baixa 0–2.5, Média 2.5–5, …) **não corresponde ao código**. Vale a tabela acima.
+> ATENCAO - Divergencia README × código: a tabela do README (Baixa 0–2.5, Média 2.5–5, …) **não corresponde ao código**. Vale a tabela acima.
 
 ### 6.4 Interpretação técnica (no PDF — faixas próprias por tipo)
 - **Impacto:** `<10` baixa resistência · `<25` moderada · `<40` elevada · `≥40` altamente compactado.
@@ -170,7 +170,7 @@ coef = leituraMPa × 10.1972      (1 MPa = 10.1972 kgf/cm²)
 ## 8. Gráficos Existentes
 
 - Não há biblioteca de gráficos real no desktop. A "visualização gráfica" é uma **barra ASCII** dentro do PDF.
-- ➜ No mobile isto será **substituído por gráficos reais** (perfil de resistência × profundidade, comparação de medições, zoom/pan/gestos).
+- No mobile isto será **substituído por gráficos reais** (perfil de resistência × profundidade, comparação de medições, zoom/pan/gestos).
 
 ---
 

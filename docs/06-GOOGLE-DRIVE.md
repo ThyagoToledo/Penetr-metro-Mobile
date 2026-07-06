@@ -8,7 +8,7 @@
 - Controlador `driveConnectionProvider` (`features/sync/application/sync_providers.dart`): conectar/desconectar, login silencioso ao abrir, e **backup cifrado** (AES-GCM) sob demanda.
 - UI: cartão em **Configurações** (conectar/backup/desconectar) e status no Dashboard.
 
-## ⚠️ Pré-requisito para o login real: OAuth Client ID
+## Pre-requisito para o login real: OAuth Client ID
 O `google_sign_in` no Android exige um **OAuth Client** configurado no Google Cloud. Sem isso, o "Conectar" falha (a UI mostra a mensagem e aponta para este doc).
 
 ### Passo a passo (Google Cloud Console)

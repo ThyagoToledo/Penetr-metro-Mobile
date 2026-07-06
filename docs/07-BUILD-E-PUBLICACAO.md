@@ -10,7 +10,7 @@
 - Config: `app/android/key.properties` (NÃO versionado — está no `.gitignore`).
 - O Gradle (`app/android/app/build.gradle.kts`) carrega o `key.properties` e assina o release.
 
-> ⚠️ **CRÍTICO:** o keystore e as senhas controlam a identidade do app na Play Store. **Guarde o `.jks` e o `key.properties` em local seguro e faça backup.** Se perder, não será possível atualizar o app publicado. A senha atual (`penetrometro2026`) é um placeholder — **troque por uma senha forte** antes de publicar (gere um novo keystore com `keytool` e atualize o `key.properties`).
+> IMPORTANTE: o keystore e as senhas controlam a identidade do app na Play Store. **Guarde o `.jks` e o `key.properties` em local seguro e faça backup.** Se perder, não será possível atualizar o app publicado. A senha atual (`penetrometro2026`) é um placeholder — **troque por uma senha forte** antes de publicar (gere um novo keystore com `keytool` e atualize o `key.properties`).
 
 ## Comandos de build (na pasta `app/`)
 ```bash
